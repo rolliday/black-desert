@@ -1,40 +1,50 @@
 {
-  "name": "black-desert",
-  "displayName": "Black Desert",
-  "description": "VSCode extension that summarizes the commands that can be used in the script, the functions, and also identifies where the selected word appears in the code. ",
+  "name": "custom-view-samples",
+  "displayName": "Custom view Samples",
+  "description": "Samples for VS Code's view API",
   "version": "0.0.1",
+  "publisher": "alexr00",
   "engines": {
-    "vscode": "^1.110.0"
+    "vscode": "^1.74.0"
   },
-  "categories": [
-    "Other"
-  ],
   "activationEvents": [],
   "main": "./out/extension.js",
   "contributes": {
-    "commands": [
-      {
-        "command": "black-desert.helloWorld",
-        "title": "Hello World"
-      }
-    ]
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "node-explorer",
+          "title": "Node Explorer",
+          "icon": "src/assets/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "explorer": [
+        {
+          "id": "explorerNodeDependencies",
+          "name": "Node Dependencies",
+          "icon": "src/assets/icon.svg"
+        }
+      ],
+      "node-explorer": [
+        {
+          "id": "nodeDependencies",
+          "name": "Node Dependencies",
+          "icon": "src/assets/icon.svg"
+        }
+      ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
-    "watch": "tsc -watch -p ./",
-    "pretest": "npm run compile && npm run lint",
-    "lint": "eslint src",
-    "test": "vscode-test"
+    "watch": "tsc -watch -p ./"
   },
   "devDependencies": {
-    "@types/vscode": "^1.110.0",
-    "@types/mocha": "^10.0.10",
-    "@types/node": "22.x",
-    "typescript-eslint": "^8.56.1",
-    "eslint": "^9.39.3",
-    "typescript": "^5.9.3",
-    "@vscode/test-cli": "^0.0.12",
-    "@vscode/test-electron": "^2.5.2"
+    "@types/node": "^10.12.21",
+    "@types/vscode": "^1.42.0",
+    "typescript": "^3.5.1",
+    "tslint": "^5.12.1"
   }
 }

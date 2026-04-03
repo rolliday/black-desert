@@ -1,6 +1,6 @@
-# black-desert README
+# Black Desert
 
-This is the README for your extension "black-desert". After writing up a brief description, we recommend including the following sections.
+VSCode extension that summarizes the commands that can be used in the script, the functions, and also identifies where the selected word appears in the code. 
 
 ## Features
 
