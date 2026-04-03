@@ -1,9 +1,9 @@
 {
-  "name": "custom-view-samples",
-  "displayName": "Custom view Samples",
-  "description": "Samples for VS Code's view API",
+  "name": "black-desert",
+  "displayName": "Black Desert",
+  "description": "Show every line where a selected word appears in the editor.",
   "version": "0.0.1",
-  "publisher": "alexr00",
+  "publisher": "seu-nome",
   "engines": {
     "vscode": "^1.74.0"
   },
@@ -13,28 +13,38 @@
     "viewsContainers": {
       "activitybar": [
         {
-          "id": "node-explorer",
-          "title": "Node Explorer",
-          "icon": "src/assets/icon.svg"
+          "id": "black-desert-container",
+          "title": "Black Desert",
+          "icon": "media/icon.svg"
         }
       ]
     },
     "views": {
       "explorer": [
         {
-          "id": "explorerNodeDependencies",
-          "name": "Node Dependencies",
+          "id": "blackDesert",
+          "name": "Black Desert",
           "icon": "src/assets/icon.svg"
         }
       ],
-      "node-explorer": [
+      "black-desert-container": [
         {
-          "id": "nodeDependencies",
-          "name": "Node Dependencies",
+          "id": "blackDesert2",
+          "name": "Black Desert",
           "icon": "src/assets/icon.svg"
         }
       ]
-    }
+    },
+    "viewsWelcome": [
+      {
+        "view": "blackDesert",
+        "contents": "Select a word in the editor to see the lines."
+      },
+      {
+        "view": "blackDesert2",
+        "contents": "Select a word in the editor to see the lines."
+      }
+    ]
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
@@ -43,8 +53,7 @@
   },
   "devDependencies": {
     "@types/node": "^10.12.21",
-    "@types/vscode": "^1.42.0",
-    "typescript": "^3.5.1",
-    "tslint": "^5.12.1"
+    "@types/vscode": "^1.74.0",
+    "typescript": "^3.5.1"
   }
 }

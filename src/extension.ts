@@ -1,103 +1,110 @@
 import * as vscode from 'vscode';
-import * as fs from 'fs';
-import * as path from 'path';
 
-export class NodeDependenciesProvider implements vscode.TreeDataProvider<Dependency> {
-  constructor(private workspaceRoot: string) {}
+// Tree item representing a line containing the selected word
+class LineItem extends vscode.TreeItem {
+  constructor(
+    public readonly lineNumber: number,
+    public readonly lineText: string,
+    public readonly filePath: string,
+    totalLines: number,
+    word: string
+  ) {
+    const digits = String(totalLines).length;
+    const lineStr = String(lineNumber + 1).padStart(digits, '0');
+    const prefix = `${lineStr}  `;
+    const text = lineText.trim();
 
-  getTreeItem(element: Dependency): vscode.TreeItem {
+    super({ label: `${prefix}${text}` }, vscode.TreeItemCollapsibleState.None);
+
+    this.tooltip = lineText;
+    this.command = {
+      command: 'blackDesert.goToLine',
+      title: 'Go to line',
+      arguments: [filePath, lineNumber, word]
+    };
+  }
+}
+
+// TreeDataProvider implementation for the "Word Lines" view
+export class blackDesertProvider implements vscode.TreeDataProvider<LineItem> {
+  private _onDidChangeTreeData = new vscode.EventEmitter<void>();
+  readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
+
+  private lines: LineItem[] = [];
+  private currentWord: string = '';
+
+  update(word: string, items: LineItem[]) {
+    this.currentWord = word;
+    this.lines = items;
+    this._onDidChangeTreeData.fire();
+  }
+
+  clear() {
+    this.currentWord = '';
+    this.lines = [];
+    this._onDidChangeTreeData.fire();
+  }
+
+  getTreeItem(element: LineItem): vscode.TreeItem {
     return element;
   }
 
-  getChildren(element?: Dependency): Thenable<Dependency[]> {
-    if (!this.workspaceRoot) {
-      vscode.window.showInformationMessage('No dependency in empty workspace');
-      return Promise.resolve([]);
-    }
-
-    if (element) {
-      return Promise.resolve(
-        this.getDepsInPackageJson(
-          path.join(this.workspaceRoot, 'node_modules', element.label, 'package.json')
-        )
-      );
-    } else {
-      const packageJsonPath = path.join(this.workspaceRoot, 'package.json');
-      if (this.pathExists(packageJsonPath)) {
-        return Promise.resolve(this.getDepsInPackageJson(packageJsonPath));
-      } else {
-        vscode.window.showInformationMessage('Workspace has no package.json');
-        return Promise.resolve([]);
-      }
-    }
-  }
-
-  private getDepsInPackageJson(packageJsonPath: string): Dependency[] {
-    if (this.pathExists(packageJsonPath)) {
-      const toDep = (moduleName: string, version: string): Dependency => {
-        if (this.pathExists(path.join(this.workspaceRoot, 'node_modules', moduleName))) {
-          return new Dependency(moduleName, version, vscode.TreeItemCollapsibleState.Collapsed);
-        } else {
-          return new Dependency(moduleName, version, vscode.TreeItemCollapsibleState.None);
-        }
-      };
-
-      const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
-
-      const deps = packageJson.dependencies
-        ? Object.keys(packageJson.dependencies).map(dep =>
-            toDep(dep, packageJson.dependencies[dep])
-          )
-        : [];
-      const devDeps = packageJson.devDependencies
-        ? Object.keys(packageJson.devDependencies).map(dep =>
-            toDep(dep, packageJson.devDependencies[dep])
-          )
-        : [];
-      return deps.concat(devDeps);
-    } else {
-      return [];
-    }
-  }
-
-  private pathExists(p: string): boolean {
-    try {
-      fs.accessSync(p);
-    } catch (err) {
-      return false;
-    }
-    return true;
+  getChildren(): LineItem[] {
+    return this.lines;
   }
 }
 
-class Dependency extends vscode.TreeItem {
-  constructor(
-    public readonly label: string,
-    private version: string,
-    public readonly collapsibleState: vscode.TreeItemCollapsibleState
-  ) {
-    super(label, collapsibleState);
-    this.tooltip = `${this.label}-${this.version}`;
-    this.description = this.version;
-  }
-
-  // FIX: path.join() retorna string, mas a API exige vscode.Uri
-  iconPath = {
-    light: vscode.Uri.file(path.join(__filename, '..', '..', 'resources', 'light', 'dependency.svg')),
-    dark: vscode.Uri.file(path.join(__filename, '..', '..', 'resources', 'dark', 'dependency.svg'))
-  };
-}
-
+// Extension activation function
 export function activate(context: vscode.ExtensionContext) {
-  const workspaceFolders = vscode.workspace.workspaceFolders;
-  const rootPath = workspaceFolders && workspaceFolders.length > 0
-    ? workspaceFolders[0].uri.fsPath
-    : '';
+  const provider = new blackDesertProvider();
 
-  vscode.window.registerTreeDataProvider(
-    'nodeDependencies',
-    new NodeDependenciesProvider(rootPath)
+  vscode.window.registerTreeDataProvider('blackDesert', provider);
+
+	// Go to line command - navigate to the line and select the word
+  context.subscriptions.push(
+		vscode.commands.registerCommand('blackDesert.goToLine', async (filePath: string, lineNumber: number, word: string) => {
+			const doc = await vscode.workspace.openTextDocument(filePath);
+			const editor = await vscode.window.showTextDocument(doc);
+		
+			const line = doc.lineAt(lineNumber);
+			const wordStart = line.text.indexOf(word);
+			
+			const start = new vscode.Position(lineNumber, wordStart);
+			const end = new vscode.Position(lineNumber, wordStart + word.length);
+		
+			editor.selection = new vscode.Selection(start, end);
+			editor.revealRange(new vscode.Range(start, end), vscode.TextEditorRevealType.InCenter);
+		})
   );
+
+	// Listen for selection changes — update or keep, but don't clear
+	context.subscriptions.push(
+		vscode.window.onDidChangeTextEditorSelection(event => {
+			const editor = event.textEditor;
+			const word = editor.document.getText(editor.selection).trim();
+
+			if (!word || word.includes('\n')) {
+				return;
+			}
+
+			const filePath = editor.document.uri.fsPath;
+			const allLines = editor.document.getText().split('\n');
+
+			const matchingLines = allLines
+				.map((lineText, index) => ({ lineText, index }))
+				.filter(({ lineText }) => lineText.includes(word))
+				.map(({ lineText, index }) => new LineItem(index, lineText, filePath, allLines.length, word));
+
+			provider.update(word, matchingLines);
+		})
+	);
+
+	// Clean only when the user types something, not on selection change
+	context.subscriptions.push(
+		vscode.workspace.onDidChangeTextDocument(() => {
+			provider.clear();
+		})
+	);
 }
 
 export function deactivate() {}
