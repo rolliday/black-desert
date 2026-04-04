@@ -131,7 +131,7 @@ export function activate(context: vscode.ExtensionContext) {
 			
 					allItems.push(...matchingLines);
 				} catch {
-					// ignora arquivos binários e outros que não podem ser lidos como texto
+					// ignore binary files and others that can't be read as text
 				}
 			}
 		
