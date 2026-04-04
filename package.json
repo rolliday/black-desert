@@ -2,8 +2,13 @@
   "name": "black-desert",
   "displayName": "Black Desert",
   "description": "Show every line where a selected word appears in the editor.",
-  "version": "0.0.1",
-  "publisher": "seu-nome",
+  "publisher": "cesar-rolli",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cesar-rolli/black-desert"
+  },
+  "version": "1.0.0",
   "engines": {
     "vscode": "^1.74.0"
   },
@@ -15,7 +20,7 @@
         {
           "id": "black-desert-container",
           "title": "Black Desert",
-          "icon": "media/icon.svg"
+          "icon": "src/assets/icon.svg"
         }
       ]
     },

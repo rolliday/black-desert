@@ -84,6 +84,7 @@ export function activate(context: vscode.ExtensionContext) {
   const provider = new blackDesertProvider();
 
   vscode.window.registerTreeDataProvider('blackDesert', provider);
+	vscode.window.registerTreeDataProvider('blackDesert2', provider);
 
 	// Go to line command - navigate to the line and select the word
   context.subscriptions.push(
