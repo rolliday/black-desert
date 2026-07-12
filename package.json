@@ -2,7 +2,7 @@
   "name": "black-desert",
   "displayName": "Black Desert",
   "description": "Show every line where a selected word appears in the editor.",
-  "publisher": "cesar-rolli",
+  "publisher": "rolliday",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -57,8 +57,9 @@
     "watch": "tsc -watch -p ./"
   },
   "devDependencies": {
-    "@types/node": "^10.12.21",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^20.14.9",
     "@types/vscode": "^1.74.0",
-    "typescript": "^3.5.1"
+    "typescript": "^7.0.2"
   }
 }
